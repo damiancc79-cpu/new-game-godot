@@ -1,0 +1,201 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/OceanEnvironment.gd" id="1_environment"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/QuadTree3D.gd" id="2_quadtree"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/Ocean3D.gd" id="3_ocean"]
+[ext_resource type="Material" path="res://addons/tessarakkt.oceanfft/Ocean.tres" id="4_ocean_material"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/MotorVesselBody3D.gd" id="5_vessel"]
+[ext_resource type="Script" path="res://addons/tessarakkt.oceanfft/components/BuoyancyProbe3D.gd" id="6_probe"]
+[ext_resource type="Shader" path="res://addons/tessarakkt.oceanfft/shaders/UnderwaterPostProc.gdshader" id="7_underwater"]
+[ext_resource type="PackedScene" path="res://assets/3d/jetski/azure_wave_jetski.glb" id="8_jetski"]
+
+[sub_resource type="FastNoiseLite" id="FastNoise_domain"]
+noise_type = 3
+fractal_type = 0
+fractal_octaves = 3
+fractal_lacunarity = 3.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_domain"]
+width = 1024
+height = 1024
+seamless = true
+noise = SubResource("FastNoise_domain")
+
+[sub_resource type="Resource" id="OceanSimulation"]
+script = ExtResource("3_ocean")
+simulation_frameskip = 0
+heightmap_sync_frameskip = 0
+fft_resolution = 256
+horizontal_dimension = 128
+time_scale = 0.9
+amplitude_scale_min = 0.12
+amplitude_scale_max = 0.28
+amplitude_scale_fade_distance = 3000.0
+domain_warp_texture = SubResource("NoiseTexture_domain")
+domain_warp_strength = 600.0
+domain_warp_uv_scale = 0.00012
+choppiness = 0.9
+wind_direction_degrees = 28.0
+wave_scroll_speed = -0.002
+wind_speed = 9.0
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSky_ocean"]
+sky_top_color = Color(0.055, 0.19, 0.42, 1)
+sky_horizon_color = Color(0.62, 0.79, 0.92, 1)
+ground_bottom_color = Color(0.015, 0.035, 0.065, 1)
+ground_horizon_color = Color(0.32, 0.49, 0.58, 1)
+sun_angle_max = 18.0
+
+[sub_resource type="Sky" id="Sky_ocean"]
+radiance_size = 3
+sky_material = SubResource("ProceduralSky_ocean")
+
+[sub_resource type="Environment" id="Environment_ocean"]
+background_mode = 2
+sky = SubResource("Sky_ocean")
+ambient_light_source = 3
+ambient_light_color = Color(0.68, 0.8, 1, 1)
+ambient_light_energy = 0.7
+reflected_light_source = 2
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.45, 0.67, 0.82, 1)
+fog_light_energy = 0.65
+fog_density = 0.0008
+fog_sky_affect = 0.25
+
+[sub_resource type="FastNoiseLite" id="FastNoise_underwater"]
+frequency = 0.018
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture_underwater"]
+width = 512
+height = 512
+seamless = true
+noise = SubResource("FastNoise_underwater")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_underwater"]
+shader = ExtResource("7_underwater")
+shader_parameter/noise_texture = SubResource("NoiseTexture_underwater")
+shader_parameter/distortion_speed = 1.8
+shader_parameter/distortion_amount = 0.32
+
+[sub_resource type="BoxShape3D" id="Shape_jetski"]
+size = Vector3(1.24, 0.7, 3.35)
+
+[node name="OceanEnvironment" type="WorldEnvironment" node_paths=PackedStringArray("sun_light", "sky_light", "underwater_post_proc")]
+environment = SubResource("Environment_ocean")
+script = ExtResource("1_environment")
+ocean = SubResource("OceanSimulation")
+sun_light = NodePath("Sun")
+sky_light = NodePath("UnderwaterSkyLight")
+underwater_post_proc = NodePath("PostProcessing/UnderwaterPostProc")
+
+[node name="OceanSurface" type="Node3D" parent="."]
+script = ExtResource("2_quadtree")
+lod_level = 5
+quad_size = 4096.0
+mesh_vertex_resolution = 128
+ranges = Array[float]([100.0, 200.0, 400.0, 800.0, 1600.0, 3200.0])
+material = ExtResource("4_ocean_material")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-42, -28, 0)
+light_color = Color(1, 0.91, 0.77, 1)
+light_energy = 1.05
+shadow_enabled = true
+directional_shadow_max_distance = 250.0
+
+[node name="UnderwaterSkyLight" type="DirectionalLight3D" parent="."]
+visible = false
+rotation_degrees = Vector3(-90, 0, 0)
+light_color = Color(0.25, 0.58, 0.92, 1)
+light_energy = 2.2
+
+[node name="JetSkiPrototype" type="RigidBody3D" parent="."]
+position = Vector3(0, 1.15, 0)
+mass = 350.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.38, 0.18)
+script = ExtResource("5_vessel")
+thrust_power_main = 11000.0
+max_rudder_force = 3200.0
+buoyancy_multiplier = 220000.0
+buoyancy_power = 1.45
+submerged_drag_linear = 0.04
+submerged_drag_angular = 0.07
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="JetSkiPrototype"]
+shape = SubResource("Shape_jetski")
+
+[node name="AzureWaveJetSki" parent="JetSkiPrototype" instance=ExtResource("8_jetski")]
+position = Vector3(0, 0.22, 0)
+rotation_degrees = Vector3(0, -90, 0)
+scale = Vector3(1.75, 1.45, 1.38)
+
+[node name="Propeller" type="Marker3D" parent="JetSkiPrototype"]
+position = Vector3(0, -0.22, 1.58)
+
+[node name="BuoyancyProbes" type="Node3D" parent="JetSkiPrototype"]
+
+[node name="ProbeBow" type="Marker3D" parent="JetSkiPrototype/BuoyancyProbes"]
+position = Vector3(0, -0.3, -1.28)
+script = ExtResource("6_probe")
+buoyancy_multiplier = 0.9
+max_cascade = 2
+
+[node name="ProbeMidPort" type="Marker3D" parent="JetSkiPrototype/BuoyancyProbes"]
+position = Vector3(-0.43, -0.31, -0.15)
+script = ExtResource("6_probe")
+max_cascade = 2
+
+[node name="ProbeMidStarboard" type="Marker3D" parent="JetSkiPrototype/BuoyancyProbes"]
+position = Vector3(0.43, -0.31, -0.15)
+script = ExtResource("6_probe")
+max_cascade = 2
+
+[node name="ProbeRearPort" type="Marker3D" parent="JetSkiPrototype/BuoyancyProbes"]
+position = Vector3(-0.45, -0.28, 1.12)
+script = ExtResource("6_probe")
+buoyancy_multiplier = 1.15
+max_cascade = 2
+
+[node name="ProbeRearStarboard" type="Marker3D" parent="JetSkiPrototype/BuoyancyProbes"]
+position = Vector3(0.45, -0.28, 1.12)
+script = ExtResource("6_probe")
+buoyancy_multiplier = 1.15
+max_cascade = 2
+
+[node name="Camera3D" type="Camera3D" parent="JetSkiPrototype"]
+position = Vector3(0, 3.2, 6.0)
+rotation_degrees = Vector3(-28, 0, 0)
+current = true
+near = 0.15
+far = 3000.0
+fov = 58.0
+
+[node name="PostProcessing" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="UnderwaterPostProc" type="ColorRect" parent="PostProcessing"]
+visible = false
+material = SubResource("ShaderMaterial_underwater")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Instructions" type="Label" parent="HUD"]
+offset_left = 24.0
+offset_top = 22.0
+offset_right = 410.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.91, 0.97, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.75)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+text = "FFT OCEAN  •  ARROW KEYS TO DRIVE"

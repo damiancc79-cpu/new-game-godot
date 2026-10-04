@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://bnugm2xlu3a8p"]
+
+[ext_resource type="Texture2D" uid="uid://o5srxbur8wwn" path="res://assets/water/scallywag/Mockup Island.png" id="1_ig7tw"]
+
+[node name="root" type="Node2D" unique_id=1345922905]
+
+[node name="WaterWorld" type="Sprite2D" parent="." unique_id=1460661807]
+texture_filter = 1
+position = Vector2(2036.9999, 1438)
+scale = Vector2(3.1828125, 3.9944446)
+texture = ExtResource("1_ig7tw")

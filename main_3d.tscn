@@ -1,0 +1,124 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_grass.glb" id="1_grass"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_riverTile.glb" id="2_river_tile"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_riverStraight.glb" id="3_river_straight"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_riverBend.glb" id="4_river_bend"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_riverRocks.glb" id="5_river_rocks"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/ground_riverEnd.glb" id="6_river_end"]
+[ext_resource type="PackedScene" path="res://assets/3d/kenney_nature_kit/cliff_waterfall_rock.glb" id="7_waterfall"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_water"]
+sky_top_color = Color(0.18, 0.42, 0.72, 1)
+sky_horizon_color = Color(0.72, 0.86, 0.96, 1)
+ground_bottom_color = Color(0.08, 0.12, 0.16, 1)
+ground_horizon_color = Color(0.48, 0.62, 0.55, 1)
+
+[sub_resource type="Sky" id="Sky_water"]
+sky_material = SubResource("ProceduralSkyMaterial_water")
+
+[sub_resource type="Environment" id="Environment_water"]
+background_mode = 2
+sky = SubResource("Sky_water")
+ambient_light_source = 3
+ambient_light_color = Color(0.72, 0.82, 1, 1)
+ambient_light_energy = 0.65
+reflected_light_source = 2
+tonemap_mode = 2
+
+[node name="WaterDemo3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_water")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-55, -30, 0)
+light_color = Color(1, 0.94, 0.82, 1)
+light_energy = 1.15
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.799207, -0.318906, 0.50949, 0, 0.847998, 0.529999, -0.601058, -0.423579, 0.677725, 4.6, 4.6, 6.0)
+current = true
+fov = 44.0
+
+[node name="Terrain" type="Node3D" parent="."]
+
+[node name="Grass_-2_-2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-2, 0, -2)
+
+[node name="Grass_-1_-2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-1, 0, -2)
+
+[node name="RiverEndNorth" parent="Terrain" instance=ExtResource("6_river_end")]
+position = Vector3(0, 0, -2)
+
+[node name="Grass_1_-2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(1, 0, -2)
+
+[node name="Grass_2_-2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(2, 0, -2)
+
+[node name="Grass_-2_-1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-2, 0, -1)
+
+[node name="Grass_-1_-1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-1, 0, -1)
+
+[node name="RiverStraight" parent="Terrain" instance=ExtResource("3_river_straight")]
+position = Vector3(0, 0, -1)
+
+[node name="Grass_1_-1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(1, 0, -1)
+
+[node name="PondTile" parent="Terrain" instance=ExtResource("2_river_tile")]
+position = Vector3(2, 0, -1)
+
+[node name="Grass_-2_0" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-2, 0, 0)
+
+[node name="Grass_-1_0" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-1, 0, 0)
+
+[node name="RiverBend" parent="Terrain" instance=ExtResource("4_river_bend")]
+
+[node name="Grass_1_0" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(1, 0, 0)
+
+[node name="Grass_2_0" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(2, 0, 0)
+
+[node name="Grass_-2_1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-2, 0, 1)
+
+[node name="Grass_-1_1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-1, 0, 1)
+
+[node name="RiverRocks" parent="Terrain" instance=ExtResource("5_river_rocks")]
+position = Vector3(0, 0, 1)
+
+[node name="Grass_1_1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(1, 0, 1)
+
+[node name="Grass_2_1" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(2, 0, 1)
+
+[node name="Grass_-2_2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-2, 0, 2)
+
+[node name="Grass_-1_2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(-1, 0, 2)
+
+[node name="RiverEndSouth" parent="Terrain" instance=ExtResource("6_river_end")]
+position = Vector3(0, 0, 2)
+rotation_degrees = Vector3(0, 180, 0)
+
+[node name="Grass_1_2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(1, 0, 2)
+
+[node name="Grass_2_2" parent="Terrain" instance=ExtResource("1_grass")]
+position = Vector3(2, 0, 2)
+
+[node name="WaterfallPreview" parent="." instance=ExtResource("7_waterfall")]
+position = Vector3(-3.15, 0.05, 0.5)
+rotation_degrees = Vector3(0, 90, 0)
